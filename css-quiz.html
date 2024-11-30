@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>CSS Quiz</title>
+</head>
+
+<body class="css-quiz">
+    <div class="start-screen">
+        <button id="start-button">Start</button>
+        <div class="rules-card">
+            <h2 class="rules-title">Rules:</h2>
+            <ul class="rules-list">
+                <li>This quiz contains 10 questions based on HTML.</li>
+                <li>You have 10 seconds to answer each question.</li>
+                <li>If you haven't chosen an answer within 10 seconds, it will move to the next question.</li>
+                <li>Once you submit, you will see your score.</li>
+                <li>You can click the restart button to take the quiz again.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="display-container" class="hide">
+        <div class="header">
+            <div class="number-of-count">
+                <span class="number-of-question">1 of 10 questions</span>
+            </div>
+            <div class="timer-div">
+                <img src="https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/stopwatch-icon.png"
+                    width="20px" />
+                <span class="time-left">10s</span>
+            </div>
+        </div>
+        <div id="container">
+            <!-- questions and options will be displayed here -->
+        </div>
+        <button id="previous-button" class="hide">Prevoius</button>
+        <button id="next-button">Next</button>
+        <button id="submit-button" class="hide">Submit</button>
+    </div>
+
+    <div class="score-container hide">
+        <div id="user-score">Demo Score</div>
+        <button id="restart">Restart</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Variables
+            let timeLeft = document.querySelector(".time-left");
+            let quizContainer = document.getElementById("container");
+            let nextBtn = document.getElementById("next-button");
+            let previousBtn = document.getElementById("previous-button");
+            let submitBtn = document.getElementById("submit-button");
+            let countOfQuestion = document.querySelector(".number-of-question");
+            let displayContainer = document.getElementById("display-container");
+            let scoreContainer = document.querySelector(".score-container");
+            let restart = document.getElementById("restart");
+            let userScore = document.getElementById("user-score");
+            let startScreen = document.querySelector(".start-screen");
+            let startButton = document.getElementById("start-button");
+            let questionCount = 0;
+            let scoreCount = 0;
+            let count = 11;
+            let countdown;
+
+            // Quiz questions and options (renamed to cssQuizArray)
+            const cssQuizArray = [
+                { id: "0", question: "What does CSS stand for?", options: ["Cascading Style Sheets", "Creative Style Sheets", "Colorful Style Sheets", "Computer Style Sheets"], correct: "Cascading Style Sheets" },
+                { id: "1", question: "Which property is used to change the background color?", options: ["color", "background-color", "bg-color", "background"], correct: "background-color" },
+                { id: "2", question: "Which property is used to change the text color?", options: ["background-color", "text-color", "color", "font-color"], correct: "color" },
+                { id: "3", question: "Which CSS property controls the font size?", options: ["text-size", "size", "font-style", "font-size"], correct: "font-size" },
+                { id: "4", question: "Which property is used to align text to the center?", options: ["text-align", "align-text", "center-align", "align"], correct: "text-align" },
+                { id: "5", question: "Which of the following is used to make text bold in CSS?", options: ["font-style", "font-weight", "text-weight", "font-bold"], correct: "font-weight" },
+                { id: "6", question: "What does the `border-radius` property do?", options: ["Sets the width of the border", "Changes the border color", "Rounds the corners of an element", "Makes the border invisible"], correct: "Rounds the corners of an element" },
+                { id: "7", question: "What property is used to add space between the content and the border?", options: ["margin", "spacing", "border-spacing", "padding"], correct: "padding" },
+                { id: "8", question: "Which property is used to set the space between elements in CSS?", options: ["margin", "padding", "space", "border"], correct: "margin" },
+                { id: "9", question: "Which property is used to control the transparency of an element?", options: ["visibility", "opacity", "display", "transparent"], correct: "opacity" }
+            ];
+
+            // Restart Quiz
+            restart.addEventListener("click", () => {
+                window.location.href = "select-quiz.html"; // Redirect to the select-quiz page
+            });
+
+            // Next Button
+            nextBtn.addEventListener("click", () => {
+                questionCount++;
+                if (questionCount === cssQuizArray.length - 1) {
+                    nextBtn.classList.add("hide");
+                    submitBtn.classList.remove("hide");
+                }
+
+                if (questionCount === cssQuizArray.length) {
+                    displayContainer.classList.add("hide");
+                    scoreContainer.classList.remove("hide");
+                    userScore.innerHTML = `Your score is ${scoreCount} out of ${cssQuizArray.length}`;
+                } else {
+                    countOfQuestion.innerHTML = `${questionCount + 1} of ${cssQuizArray.length} Questions`;
+                    quizDisplay(questionCount);
+                    count = 11;
+                    clearInterval(countdown);
+                    timerDisplay();
+                    previousBtn.classList.remove("hide"); // Show "Previous" button after the first question
+                }
+            });
+
+            // Previous Button
+            previousBtn.addEventListener("click", () => {
+                if (questionCount > 0) {
+                    questionCount--;
+                    countOfQuestion.innerHTML = `${questionCount + 1} of ${cssQuizArray.length} Questions`;
+                    quizDisplay(questionCount);
+                    count = 11;
+                    clearInterval(countdown);
+                    timerDisplay();
+
+                    if (questionCount === cssQuizArray.length - 1) {
+                        nextBtn.classList.add("hide");
+                        submitBtn.classList.remove("hide");
+                    } else {
+                        nextBtn.classList.remove("hide");
+                        submitBtn.classList.add("hide");
+                    }
+
+                    if (questionCount === 0) {
+                        previousBtn.classList.add("hide"); // Hide "Previous" button on the first question
+                    }
+                }
+            });
+
+            // Submit Button
+            submitBtn.addEventListener("click", () => {
+                displayContainer.classList.add("hide");
+                scoreContainer.classList.remove("hide");
+                userScore.innerHTML = `Your score is ${scoreCount} out of ${cssQuizArray.length}`;
+            });
+
+            // Timer
+            const timerDisplay = () => {
+                countdown = setInterval(() => {
+                    count--;
+                    timeLeft.innerHTML = `${count}s`;
+                    if (count == 0) {
+                        clearInterval(countdown);
+                        nextBtn.click();
+                    }
+                }, 1000);
+            };
+
+            // Display quiz
+            const quizDisplay = (questionCount) => {
+                let quizCards = document.querySelectorAll(".container-mid");
+                quizCards.forEach((card) => card.classList.add("hide"));
+                quizCards[questionCount].classList.remove("hide");
+            };
+
+            // Create quiz
+            function quizCreator() {
+                cssQuizArray.forEach((questionObj) => {
+                    let div = document.createElement("div");
+                    div.classList.add("container-mid", "hide");
+
+                    let questionDiv = document.createElement("p");
+                    questionDiv.classList.add("question");
+                    questionDiv.innerHTML = questionObj.question;
+                    div.appendChild(questionDiv);
+
+                    questionObj.options.forEach(option => {
+                        let optionButton = document.createElement("button");
+                        optionButton.classList.add("option-div");
+                        optionButton.innerHTML = option;
+                        optionButton.onclick = () => checker(optionButton);
+                        div.appendChild(optionButton);
+                    });
+
+                    quizContainer.appendChild(div);
+                });
+            }
+
+            // Answer Checker
+            function checker(userOption) {
+                let userSolution = userOption.innerText;
+                let question = document.getElementsByClassName("container-mid")[questionCount];
+                let options = question.querySelectorAll(".option-div");
+
+                let correctAnswer = cssQuizArray[questionCount].correct;
+
+                if (userSolution === correctAnswer) {
+                    userOption.classList.add("correct");
+                    scoreCount++;
+                } else {
+                    userOption.classList.add("incorrect");
+                    options.forEach((option) => {
+                        if (option.innerText === correctAnswer) {
+                            option.classList.add("correct");
+                        }
+                    });
+                }
+
+                options.forEach((element) => {
+                    element.disabled = true;
+                });
+            }
+
+            // Initial setup
+            function initial() {
+                quizContainer.innerHTML = "";
+                questionCount = 0;
+                scoreCount = 0;
+                count = 11;
+                clearInterval(countdown);
+                timerDisplay();
+                quizCreator();
+                quizDisplay(questionCount);
+            }
+
+            // Start button
+            startButton.addEventListener("click", () => {
+                startScreen.classList.add("hide");
+                displayContainer.classList.remove("hide");
+                initial();
+            });
+        });
+
+
+    </script>
+</body>
+
+</html>

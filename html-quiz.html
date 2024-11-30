@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <title>HTML Quiz</title>
+</head>
+
+<body class="html-quiz">
+    <div class="start-screen">
+        <button id="start-button">Start</button>
+        <div class="rules-card">
+            <h2 class="rules-title">Rules:</h2>
+            <ul class="rules-list">
+                <li>This quiz contains 10 questions based on HTML.</li>
+                <li>You have 10 seconds to answer each question.</li>
+                <li>If you haven't chosen an answer within 10 seconds, it will move to the next question.</li>
+                <li>Once you submit, you will see your score.</li>
+                <li>You can click the restart button to take the quiz again.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="display-container" class="hide">
+        <div class="header">
+            <div class="number-of-count">
+                <span class="number-of-question">1 of 10 questions</span>
+            </div>
+            <div class="timer-div">
+                <img src="https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/stopwatch-icon.png"
+                    width="20px" />
+                <span class="time-left">10s</span>
+            </div>
+        </div>
+        <div id="container">
+            <!-- questions and options will be displayed here -->
+        </div>
+
+        <button id="previous-button" class="hide">Prevoius</button>
+        <button id="next-button">Next</button>
+        <button id="submit-button" class="hide">Submit</button>
+    </div>
+
+    <div class="score-container hide">
+        <div id="user-score">Demo Score</div>
+        <button id="restart">Restart</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            // Variables
+            let timeLeft = document.querySelector(".time-left");
+            let quizContainer = document.getElementById("container");
+            let nextBtn = document.getElementById("next-button");
+            let previousBtn = document.getElementById("previous-button");
+            let submitBtn = document.getElementById("submit-button");
+            let countOfQuestion = document.querySelector(".number-of-question");
+            let displayContainer = document.getElementById("display-container");
+            let scoreContainer = document.querySelector(".score-container");
+            let restart = document.getElementById("restart");
+            let userScore = document.getElementById("user-score");
+            let startScreen = document.querySelector(".start-screen");
+            let startButton = document.getElementById("start-button");
+            let questionCount = 0;
+            let scoreCount = 0;
+            let count = 11;
+            let countdown;
+
+            // Quiz questions and options
+            const quizArray = [
+                { id: "0", question: "What does the &lt;h1&gt; tag represent in HTML?", options: ["A hyperlink", "A paragraph", "A header", "An image"], correct: "A header" },
+                { id: "1", question: "Which of the following is the correct HTML element for inserting an image?", options: ["&lt;image&gt;", "&lt;src&gt;", "&lt;img&gt;", "&lt;picture&gt;"], correct: "<img>" },
+                { id: "2", question: "Which HTML element is used to define an unordered list?", options: ["&lt;ol&gt;", "&lt;ul&gt;", "&lt;li&gt;", "&lt;list&gt;"], correct: "<ul>" },
+                { id: "3", question: "Which attribute is used to define the style of an HTML element?", options: ["class", "id", "style", "type"], correct: "style" },
+                { id: "4", question: "What does the &lt;a&gt; tag do in HTML?", options: ["It creates a link", "It defines a paragraph", "It inserts an image", "It creates a table"], correct: "It creates a link" },
+                { id: "5", question: "Which tag is used to define a table in HTML?", options: ["&lt;table&gt;", "&lt;td&gt;", "&lt;th&gt;", "&lt;tr&gt;"], correct: "<table>" },
+                { id: "6", question: "What is the purpose of the &lt;form&gt; element in HTML?", options: ["To create a table", "To add text", "To create an input form", "To insert an image"], correct: "To create an input form" },
+                { id: "7", question: "Which attribute is used to specify the URL of a link in the &lt;a&gt; tag?", options: ["src", "alt", "url", "href"], correct: "href" },
+                { id: "8", question: "Which tag is used to define a division or section in an HTML document?", options: ["&lt;section&gt;", "&lt;div&gt;", "&lt;span&gt;", "&lt;p&gt;"], correct: "<div>" },
+                { id: "9", question: "How do you create a comment in HTML?", options: ["&ltcomment&gt", "// comment", "&lt;!-- comment --&gt;", "/* comment */"], correct: "<!-- comment -->" }
+            ];
+
+            // Restart Quiz
+            restart.addEventListener("click", () => {
+                window.location.href = "select-quiz.html"; // Redirect to the select-quiz page
+            });
+
+            // Next Button
+            nextBtn.addEventListener("click", () => {
+                questionCount++;
+                if (questionCount === quizArray.length - 1) {
+                    nextBtn.classList.add("hide");
+                    submitBtn.classList.remove("hide");
+                }
+
+                if (questionCount === quizArray.length) {
+                    displayContainer.classList.add("hide");
+                    scoreContainer.classList.remove("hide");
+                    userScore.innerHTML = `Your score is ${scoreCount} out of ${quizArray.length}`;
+                } else {
+                    countOfQuestion.innerHTML = `${questionCount + 1} of ${quizArray.length} Questions`;
+                    quizDisplay(questionCount);
+                    count = 11;
+                    clearInterval(countdown);
+                    timerDisplay();
+                    previousBtn.classList.remove("hide"); // Show "Previous" button after the first question
+                }
+            });
+
+            // Previous Button
+            previousBtn.addEventListener("click", () => {
+                if (questionCount > 0) {
+                    questionCount--;
+                    countOfQuestion.innerHTML = `${questionCount + 1} of ${quizArray.length} Questions`;
+                    quizDisplay(questionCount);
+                    count = 11;
+                    clearInterval(countdown);
+                    timerDisplay();
+
+                    if (questionCount === quizArray.length - 1) {
+                        nextBtn.classList.add("hide");
+                        submitBtn.classList.remove("hide");
+                    } else {
+                        nextBtn.classList.remove("hide");
+                        submitBtn.classList.add("hide");
+                    }
+
+                    if (questionCount === 0) {
+                        previousBtn.classList.add("hide"); // Hide "Previous" button on the first question
+                    }
+                }
+            });
+
+            // Submit Button
+            submitBtn.addEventListener("click", () => {
+                displayContainer.classList.add("hide");
+                scoreContainer.classList.remove("hide");
+                userScore.innerHTML = `Your score is ${scoreCount} out of ${quizArray.length}`;
+            });
+
+            // Timer
+            const timerDisplay = () => {
+                countdown = setInterval(() => {
+                    count--;
+                    timeLeft.innerHTML = `${count}s`;
+                    if (count == 0) {
+                        clearInterval(countdown);
+                        nextBtn.click();
+                    }
+                }, 1000);
+            };
+
+            // Display quiz
+            const quizDisplay = (questionCount) => {
+                let quizCards = document.querySelectorAll(".container-mid");
+                quizCards.forEach((card) => card.classList.add("hide"));
+                quizCards[questionCount].classList.remove("hide");
+            };
+
+            // Create quiz
+            function quizCreator() {
+                quizArray.forEach((questionObj) => {
+                    let div = document.createElement("div");
+                    div.classList.add("container-mid", "hide");
+
+                    let questionDiv = document.createElement("p");
+                    questionDiv.classList.add("question");
+                    questionDiv.innerHTML = questionObj.question;
+                    div.appendChild(questionDiv);
+
+                    questionObj.options.forEach(option => {
+                        let optionButton = document.createElement("button");
+                        optionButton.classList.add("option-div");
+                        optionButton.innerHTML = option;
+                        optionButton.onclick = () => checker(optionButton);
+                        div.appendChild(optionButton);
+                    });
+
+                    quizContainer.appendChild(div);
+                });
+            }
+
+            // Answer Checker
+            function checker(userOption) {
+                let userSolution = userOption.innerText;
+                let question = document.getElementsByClassName("container-mid")[questionCount];
+                let options = question.querySelectorAll(".option-div");
+
+                let correctAnswer = quizArray[questionCount].correct;
+
+                if (userSolution === correctAnswer) {
+                    userOption.classList.add("correct");
+                    scoreCount++;
+                } else {
+                    userOption.classList.add("incorrect");
+                    options.forEach((option) => {
+                        if (option.innerText === correctAnswer) {
+                            option.classList.add("correct");
+                        }
+                    });
+                }
+
+                options.forEach((element) => {
+                    element.disabled = true;
+                });
+            }
+
+            // Initial setup
+            function initial() {
+                quizContainer.innerHTML = "";
+                questionCount = 0;
+                scoreCount = 0;
+                count = 11;
+                clearInterval(countdown);
+                timerDisplay();
+                quizCreator();
+                quizDisplay(questionCount);
+            }
+
+            // Start button
+            startButton.addEventListener("click", () => {
+                startScreen.classList.add("hide");
+                displayContainer.classList.remove("hide");
+                initial();
+            });
+        });
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>BootStrap Quiz</title>
+</head>
+
+<body class="bootstrap-quiz">
+    <div class="start-screen">
+        <button id="start-button">Start</button>
+        <div class="rules-card">
+            <h2 class="rules-title">Rules:</h2>
+            <ul class="rules-list">
+                <li>This quiz contains 10 questions based on HTML.</li>
+                <li>You have 10 seconds to answer each question.</li>
+                <li>If you haven't chosen an answer within 10 seconds, it will move to the next question.</li>
+                <li>Once you submit, you will see your score.</li>
+                <li>You can click the restart button to take the quiz again.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="display-container" class="hide">
+        <div class="header">
+            <div class="number-of-count">
+                <span class="number-of-question">1 of 10 questions</span>
+            </div>
+            <div class="timer-div">
+                <img src="https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/stopwatch-icon.png"
+                    width="20px" />
+                <span class="time-left">10s</span>
+            </div>
+        </div>
+        <div id="container">
+            <!-- questions and options will be displayed here -->
+        </div>
+        <button id="previous-button" class="hide">Prevoius</button>
+        <button id="next-button">Next</button>
+        <button id="submit-button" class="hide">Submit</button>
+    </div>
+
+    <div class="score-container hide">
+        <div id="user-score">Demo Score</div>
+        <button id="restart">Back</button>
+    </div>
+
+    <script>
+document.addEventListener('DOMContentLoaded', (event) => {
+    // Variables
+    let timeLeft = document.querySelector(".time-left");
+    let quizContainer = document.getElementById("container");
+    let nextBtn = document.getElementById("next-button");
+    let previousBtn = document.getElementById("previous-button"); // New previous button
+    let submitBtn = document.getElementById("submit-button");
+    let countOfQuestion = document.querySelector(".number-of-question");
+    let displayContainer = document.getElementById("display-container");
+    let scoreContainer = document.querySelector(".score-container");
+    let restart = document.getElementById("restart");
+    let userScore = document.getElementById("user-score");
+    let startScreen = document.querySelector(".start-screen");
+    let startButton = document.getElementById("start-button");
+    let questionCount = 0;
+    let scoreCount = 0;
+    let count = 11; // countdown timer value
+    let countdown;
+
+    // Bootstrap quiz questions and options
+    const bootstrapQuizArray = [
+        { id: "0", question: "What is Bootstrap?", options: ["A CSS Framework", "A JavaScript Library", "A Web Server", "An HTML tag"], correct: "A CSS Framework" },
+        { id: "1", question: "Which of the following is the correct way to link the Bootstrap CSS file?", options: ["&lt;link href='bootstrap.css'&gt;", "&lt;link rel='stylesheet' href='bootstrap.min.css'&gt;", "&lt;style src='bootstrap.css'&gt;", "&lt;link href='bootstrap.min.js'&gt;"], correct: "<link rel='stylesheet' href='bootstrap.min.css'>" },
+        { id: "2", question: "What is the container class in Bootstrap used for?", options: ["It creates a fluid container", "It is used for spacing","It creates a fixed-width container", "It is used for buttons"], correct: "It creates a fixed-width container" },
+        { id: "3", question: "Which class in Bootstrap is used to make a button large?", options: ["btn-big", "btn-large", "btn-extended","btn-lg"], correct: "btn-lg" },
+        { id: "4", question: "Which of the following is used for grid layout in Bootstrap?", options: [".container", ".grid", ".col-12", ".wrapper"], correct: ".col-12" },
+        { id: "5", question: "Which class is used to create a Bootstrap card?", options: [".card", ".panel", ".box", ".item"], correct: ".card" },
+        { id: "6", question: "How do you create a responsive image in Bootstrap?", options: ["img-responsive", "image-responsive", "img-auto","img-fluid"], correct: "img-fluid" },
+        { id: "7", question: "Which class is used to align text to the center in Bootstrap?", options: [".align-center", ".center-text", ".text-center", ".center-align"], correct: ".text-center" },
+        { id: "8", question: "What does the class 'd-flex' do in Bootstrap?", options: [ "Makes an element inline-block", "Makes an element display block", "Makes an element hidden","Makes an element a flex container",], correct: "Makes an element a flex container" },
+        { id: "9", question: "Which Bootstrap class is used to create a navbar?", options: [".navbar", ".navbar-header", ".navbar-nav", ".nav-bar"], correct: ".navbar" },
+    ];
+
+    // Restart Quiz
+    restart.addEventListener("click", () => {
+        window.location.href = "select-quiz.html"; // Redirect to the select-quiz page
+    });
+
+    // Next Button
+    nextBtn.addEventListener("click", () => {
+        questionCount++;
+        if (questionCount === bootstrapQuizArray.length - 1) {
+            nextBtn.classList.add("hide");
+            submitBtn.classList.remove("hide");
+        }
+
+        if (questionCount === bootstrapQuizArray.length) {
+            displayContainer.classList.add("hide");
+            scoreContainer.classList.remove("hide");
+            userScore.innerHTML = `Your score is ${scoreCount} out of ${bootstrapQuizArray.length}`;
+        } else {
+            countOfQuestion.innerHTML = `${questionCount + 1} of ${bootstrapQuizArray.length} Questions`;
+            quizDisplay(questionCount);
+            count = 11;
+            clearInterval(countdown);
+            timerDisplay();
+        }
+
+        // Show Previous Button from the second question
+        if (questionCount > 0) {
+            previousBtn.classList.remove("hide");
+        }
+    });
+
+    // Previous Button
+    previousBtn.addEventListener("click", () => {
+        if (questionCount > 0) {
+            questionCount--;
+            nextBtn.classList.remove("hide");
+            submitBtn.classList.add("hide");
+            countOfQuestion.innerHTML = `${questionCount + 1} of ${bootstrapQuizArray.length} Questions`;
+            quizDisplay(questionCount);
+            count = 11;
+            clearInterval(countdown);
+            timerDisplay();
+        }
+
+        // Hide Previous Button on the first question
+        if (questionCount === 0) {
+            previousBtn.classList.add("hide");
+        }
+    });
+
+    // Submit Button
+    submitBtn.addEventListener("click", () => {
+        displayContainer.classList.add("hide");
+        scoreContainer.classList.remove("hide");
+        userScore.innerHTML = `Your score is ${scoreCount} out of ${bootstrapQuizArray.length}`;
+    });
+
+    // Timer
+    const timerDisplay = () => {
+        countdown = setInterval(() => {
+            count--;
+            timeLeft.innerHTML = `${count}s`;
+            if (count == 0) {
+                clearInterval(countdown);
+                nextBtn.click();
+            }
+        }, 1000);
+    };
+
+    // Display quiz
+    const quizDisplay = (questionCount) => {
+        let quizCards = document.querySelectorAll(".container-mid");
+        quizCards.forEach((card) => card.classList.add("hide"));
+        quizCards[questionCount].classList.remove("hide");
+    };
+
+    // Create quiz
+    function quizCreator() {
+        bootstrapQuizArray.forEach((questionObj) => {
+            let div = document.createElement("div");
+            div.classList.add("container-mid", "hide");
+
+            let questionDiv = document.createElement("p");
+            questionDiv.classList.add("question");
+            questionDiv.innerHTML = questionObj.question;
+            div.appendChild(questionDiv);
+
+            questionObj.options.forEach(option => {
+                let optionButton = document.createElement("button");
+                optionButton.classList.add("option-div");
+                optionButton.innerHTML = option;
+                optionButton.onclick = () => checker(optionButton);
+                div.appendChild(optionButton);
+            });
+
+            quizContainer.appendChild(div);
+        });
+
+        // Show the first question
+        quizDisplay(0); // Ensure the first question is visible when the quiz starts
+    }
+
+    // Answer Checker
+    function checker(userOption) {
+        let userSolution = userOption.innerText;
+        let question = document.getElementsByClassName("container-mid")[questionCount];
+        let options = question.querySelectorAll(".option-div");
+
+        let correctAnswer = bootstrapQuizArray[questionCount].correct;
+
+        // If the user's selected option is correct
+        if (userSolution === correctAnswer) {
+            userOption.classList.add("correct"); // Add 'correct' class to the selected option
+            scoreCount++;
+        } else {
+            userOption.classList.add("incorrect"); // Add 'incorrect' class to the selected option
+
+            // Highlight the correct answer as well
+            options.forEach(option => {
+                if (option.innerText === correctAnswer) {
+                    option.classList.add("correct"); // Highlight the correct option
+                }
+            });
+        }
+
+        // Disable all options after an answer is selected
+        options.forEach(option => option.disabled = true);
+    }
+
+    // Start Quiz
+    startButton.addEventListener("click", () => {
+        startScreen.classList.add("hide");
+        displayContainer.classList.remove("hide");
+        quizCreator();
+        countOfQuestion.innerHTML = `1 of ${bootstrapQuizArray.length} questions`;
+        timerDisplay();
+    });
+});
+
+    </script>
+</body>
+
+</html>
