@@ -382,7 +382,7 @@ body.select-quiz {
   .quiz-btn {
     margin-top: 8px !important;
     height: 40px;
-    width: 325px !important;
+    width: 310px !important;
     border-radius: 2px;
     border: none;
     background-color: #fff;
@@ -390,6 +390,7 @@ body.select-quiz {
     font-family: inherit;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-right: 10px;
 }
 
 .quiz-btn:hover {
