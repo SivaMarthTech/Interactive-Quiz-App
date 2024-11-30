@@ -390,7 +390,7 @@ body.select-quiz {
     font-family: inherit;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    margin-right: 20px;
+    margin-right: 16px;
 }
 
 .quiz-btn:hover {
