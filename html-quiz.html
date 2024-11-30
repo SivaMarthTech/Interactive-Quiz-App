@@ -35,7 +35,7 @@
             </div>
         </div>
         <div id="container">
-            <!-- questions and options will be displayed here -->
+
         </div>
 
         <button id="previous-button" class="hide">Prevoius</button>
@@ -46,11 +46,15 @@
     <div class="score-container hide">
         <div id="user-score">Demo Score</div>
         <button id="restart">Restart</button>
+        <div id="review-card" class="review-card hide">
+            <h3>Your Answers</h3>
+            <div id="answer-list"></div>
+        </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {
-            // Variables
+
             let timeLeft = document.querySelector(".time-left");
             let quizContainer = document.getElementById("container");
             let nextBtn = document.getElementById("next-button");
@@ -68,7 +72,8 @@
             let count = 11;
             let countdown;
 
-            // Quiz questions and options
+            let userAnswers = [];
+
             const quizArray = [
                 { id: "0", question: "What does the &lt;h1&gt; tag represent in HTML?", options: ["A hyperlink", "A paragraph", "A header", "An image"], correct: "A header" },
                 { id: "1", question: "Which of the following is the correct HTML element for inserting an image?", options: ["&lt;image&gt;", "&lt;src&gt;", "&lt;img&gt;", "&lt;picture&gt;"], correct: "<img>" },
@@ -82,12 +87,12 @@
                 { id: "9", question: "How do you create a comment in HTML?", options: ["&ltcomment&gt", "// comment", "&lt;!-- comment --&gt;", "/* comment */"], correct: "<!-- comment -->" }
             ];
 
-            // Restart Quiz
+
             restart.addEventListener("click", () => {
-                window.location.href = "select-quiz.html"; // Redirect to the select-quiz page
+                window.location.href = "select-quiz.html";
             });
 
-            // Next Button
+
             nextBtn.addEventListener("click", () => {
                 questionCount++;
                 if (questionCount === quizArray.length - 1) {
@@ -99,17 +104,42 @@
                     displayContainer.classList.add("hide");
                     scoreContainer.classList.remove("hide");
                     userScore.innerHTML = `Your score is ${scoreCount} out of ${quizArray.length}`;
+                    showReviewCard(); // Show the review card after submission
                 } else {
                     countOfQuestion.innerHTML = `${questionCount + 1} of ${quizArray.length} Questions`;
                     quizDisplay(questionCount);
                     count = 11;
                     clearInterval(countdown);
                     timerDisplay();
-                    previousBtn.classList.remove("hide"); // Show "Previous" button after the first question
+                    previousBtn.classList.remove("hide");
                 }
             });
 
-            // Previous Button
+
+            function showReviewCard() {
+                let reviewCard = document.getElementById("review-card");
+                let answerList = document.getElementById("answer-list");
+                answerList.innerHTML = "";
+
+                quizArray.forEach((question, index) => {
+                    let answerDiv = document.createElement("div");
+                    answerDiv.classList.add("answer");
+
+                    let selectedAnswer = userAnswers[index] ? userAnswers[index].selected : "No answer selected";
+                    let correctAnswer = question.correct;
+
+                    answerDiv.innerHTML = `
+                <strong>Q${index + 1}: </strong>${question.question}<br>
+                <strong>Your Answer: </strong>${selectedAnswer}<br>
+                <strong>Correct Answer: </strong>${correctAnswer}
+            `;
+                    answerList.appendChild(answerDiv);
+                });
+
+                reviewCard.classList.remove("hide");
+            }
+
+
             previousBtn.addEventListener("click", () => {
                 if (questionCount > 0) {
                     questionCount--;
@@ -128,19 +158,20 @@
                     }
 
                     if (questionCount === 0) {
-                        previousBtn.classList.add("hide"); // Hide "Previous" button on the first question
+                        previousBtn.classList.add("hide");
                     }
                 }
             });
 
-            // Submit Button
+
             submitBtn.addEventListener("click", () => {
                 displayContainer.classList.add("hide");
                 scoreContainer.classList.remove("hide");
                 userScore.innerHTML = `Your score is ${scoreCount} out of ${quizArray.length}`;
+                showReviewCard();
             });
 
-            // Timer
+
             const timerDisplay = () => {
                 countdown = setInterval(() => {
                     count--;
@@ -152,14 +183,14 @@
                 }, 1000);
             };
 
-            // Display quiz
+
             const quizDisplay = (questionCount) => {
                 let quizCards = document.querySelectorAll(".container-mid");
                 quizCards.forEach((card) => card.classList.add("hide"));
                 quizCards[questionCount].classList.remove("hide");
             };
 
-            // Create quiz
+
             function quizCreator() {
                 quizArray.forEach((questionObj) => {
                     let div = document.createElement("div");
@@ -174,7 +205,7 @@
                         let optionButton = document.createElement("button");
                         optionButton.classList.add("option-div");
                         optionButton.innerHTML = option;
-                        optionButton.onclick = () => checker(optionButton);
+                        optionButton.onclick = () => checker(optionButton, questionObj);
                         div.appendChild(optionButton);
                     });
 
@@ -182,13 +213,13 @@
                 });
             }
 
-            // Answer Checker
-            function checker(userOption) {
+
+            function checker(userOption, questionObj) {
                 let userSolution = userOption.innerText;
                 let question = document.getElementsByClassName("container-mid")[questionCount];
                 let options = question.querySelectorAll(".option-div");
 
-                let correctAnswer = quizArray[questionCount].correct;
+                let correctAnswer = questionObj.correct;
 
                 if (userSolution === correctAnswer) {
                     userOption.classList.add("correct");
@@ -202,12 +233,15 @@
                     });
                 }
 
+
+                userAnswers[questionCount] = { selected: userSolution, correct: correctAnswer };
+
                 options.forEach((element) => {
                     element.disabled = true;
                 });
             }
 
-            // Initial setup
+
             function initial() {
                 quizContainer.innerHTML = "";
                 questionCount = 0;
@@ -219,7 +253,7 @@
                 quizDisplay(questionCount);
             }
 
-            // Start button
+
             startButton.addEventListener("click", () => {
                 startScreen.classList.add("hide");
                 displayContainer.classList.remove("hide");

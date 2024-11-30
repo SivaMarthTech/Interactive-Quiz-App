@@ -28,15 +28,16 @@
     <div id="display-container" class="hide">
         <div class="header">
             <div class="number-of-count">
-                <span class="number-of-question">1 of 15 questions</span>
+                <span class="number-of-question">1 of 10 questions</span>
             </div>
             <div class="timer-div">
-                <img src="https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/stopwatch-icon.png" width="20px" />
+                <img src="https://uxwing.com/wp-content/themes/uxwing/download/time-and-date/stopwatch-icon.png"
+                    width="20px" />
                 <span class="time-left">10s</span>
             </div>
         </div>
         <div id="container">
-            <!-- questions and options will be displayed here -->
+
         </div>
         <button id="previous-button" class="hide">Prevoius</button>
         <button id="next-button">Next</button>
@@ -45,186 +46,223 @@
 
     <div class="score-container hide">
         <div id="user-score">Demo Score</div>
-        <button id="restart">Back</button>
+        <button id="restart">Restart</button>
+        <div id="review-card" class="review-card hide">
+            <h3>Your Answers</h3>
+            <div id="answer-list"></div>
+        </div>
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', (event) => {
-    // Variables
-    let timeLeft = document.querySelector(".time-left");
-    let quizContainer = document.getElementById("container");
-    let nextBtn = document.getElementById("next-button");
-    let previousBtn = document.getElementById("previous-button"); // New previous button
-    let submitBtn = document.getElementById("submit-button");
-    let countOfQuestion = document.querySelector(".number-of-question");
-    let displayContainer = document.getElementById("display-container");
-    let scoreContainer = document.querySelector(".score-container");
-    let restart = document.getElementById("restart");
-    let userScore = document.getElementById("user-score");
-    let startScreen = document.querySelector(".start-screen");
-    let startButton = document.getElementById("start-button");
-    let questionCount = 0;
-    let scoreCount = 0;
-    let count = 11;
-    let countdown;
+        document.addEventListener('DOMContentLoaded', (event) => {
 
-    // Computer Science quiz questions and options
-    const computerScienceQuizArray = [
+            let timeLeft = document.querySelector(".time-left");
+            let quizContainer = document.getElementById("container");
+            let nextBtn = document.getElementById("next-button");
+            let previousBtn = document.getElementById("previous-button"); // New previous button
+            let submitBtn = document.getElementById("submit-button");
+            let countOfQuestion = document.querySelector(".number-of-question");
+            let displayContainer = document.getElementById("display-container");
+            let scoreContainer = document.querySelector(".score-container");
+            let restart = document.getElementById("restart");
+            let userScore = document.getElementById("user-score");
+            let startScreen = document.querySelector(".start-screen");
+            let startButton = document.getElementById("start-button");
+            let questionCount = 0;
+            let scoreCount = 0;
+            let count = 11;
+            let countdown;
+
+            let userAnswers = [];
+
+            const computerScienceQuizArray = [
                 { id: "0", question: "What is the full form of CPU?", options: ["Central Process Unit", "Computer Personal Unit", "Central Processing Unit", "Central Processor Unit"], correct: "Central Processing Unit" },
                 { id: "1", question: "Which language is known as the mother of all programming languages?", options: ["C", "Python", "Assembly", "FORTRAN"], correct: "C" },
-                { id: "2", question: "What does 'HTML' stand for?", options: ["Hyperlink and Text Markup Language", "Home Tool Markup Language", "HyperText Machine Language","HyperText Markup Language"], correct: "HyperText Markup Language" },
+                { id: "2", question: "What does 'HTML' stand for?", options: ["Hyperlink and Text Markup Language", "Home Tool Markup Language", "HyperText Machine Language", "HyperText Markup Language"], correct: "HyperText Markup Language" },
                 { id: "3", question: "Who is known as the father of computer science?", options: ["Alan Turing", "Charles Babbage", "John von Neumann", "Steve Jobs"], correct: "Charles Babbage" },
-                { id: "4", question: "Which data structure follows the Last In First Out (LIFO) principle?", options: ["Queue","Array", "Stack", "Linked List"], correct: "Stack" },
+                { id: "4", question: "Which data structure follows the Last In First Out (LIFO) principle?", options: ["Queue", "Array", "Stack", "Linked List"], correct: "Stack" },
                 { id: "5", question: "What is the primary function of the operating system?", options: ["Provide Network Services", "Manage Hardware", "Run Applications", "Manage Databases"], correct: "Manage Hardware" },
-                { id: "6", question: "Which of the following is a non-volatile memory?", options: ["RAM", "Cache", "Register","Hard Drive",], correct: "Hard Drive" },
+                { id: "6", question: "Which of the following is a non-volatile memory?", options: ["RAM", "Cache", "Register", "Hard Drive",], correct: "Hard Drive" },
                 { id: "7", question: "Which language is used for web development?", options: ["Java", "C++", "HTML", "C#"], correct: "HTML" },
                 { id: "8", question: "Which of these is a type of network topology?", options: ["Bus", "Fibonacci", "Java", "Array"], correct: "Bus" },
                 { id: "9", question: "Which of the following is an example of an algorithm?", options: ["A recipe", "A shopping list", "A list of instructions", "All of the above"], correct: "All of the above" },
-                { id: "10", question: "What does HTTP stand for?", options: ["HyperText Transfer Protocol", "Hyper Transfer Text Protocol", "Home Tool Transfer Protocol", "HyperText Transaction Protocol"], correct: "HyperText Transfer Protocol" },
-                { id: "11", question: "Which of these is a type of database management system?", options: [ "DBMS", "Turing Machine", "OS","RDBMS"], correct: "RDBMS" },
-                { id: "12", question: "Which programming language is mainly used for statistical analysis?", options: ["Java", "Python","R", "C"], correct: "R" },
-                { id: "13", question: "What does 'API' stand for?", options: ["Application Programming Interface", "Application Processing Interface", "Automated Programming Interface", "Application Process Instruction"], correct: "Application Programming Interface" },
-                { id: "14", question: "Which search algorithm is best for searching a sorted list?", options: ["Linear Search", "Binary Search", "Depth First Search", "Breadth First Search"], correct: "Binary Search" }
             ];
 
-    // Restart Quiz
-    restart.addEventListener("click", () => {
-        window.location.href = "select-quiz.html"; // Redirect to the select-quiz page
-    });
 
-    // Next Button
-    nextBtn.addEventListener("click", () => {
-        questionCount++;
-        if (questionCount === computerScienceQuizArray.length - 1) {
-            nextBtn.classList.add("hide");
-            submitBtn.classList.remove("hide");
-        }
-
-        if (questionCount === computerScienceQuizArray.length) {
-            displayContainer.classList.add("hide");
-            scoreContainer.classList.remove("hide");
-            userScore.innerHTML = `Your score is ${scoreCount} out of ${computerScienceQuizArray.length}`;
-        } else {
-            countOfQuestion.innerHTML = `${questionCount + 1} of ${computerScienceQuizArray.length} Questions`;
-            quizDisplay(questionCount);
-            count = 11;
-            clearInterval(countdown);
-            timerDisplay();
-        }
-         // Show Previous Button from the second question
-         if (questionCount > 0) {
-            previousBtn.classList.remove("hide");
-        }
-    });
-
-    // Previous Button
-    previousBtn.addEventListener("click", () => {
-        if (questionCount > 0) {
-            questionCount--;
-            nextBtn.classList.remove("hide");
-            submitBtn.classList.add("hide");
-            countOfQuestion.innerHTML = `${questionCount + 1} of ${computerScienceQuizArray.length} Questions`;
-            quizDisplay(questionCount);
-            count = 11;
-            clearInterval(countdown);
-            timerDisplay();
-        }
-
-        // Hide Previous Button on the first question
-        if (questionCount === 0) {
-            previousBtn.classList.add("hide");
-        }
-    });
-
-
-    // Submit Button
-    submitBtn.addEventListener("click", () => {
-        displayContainer.classList.add("hide");
-        scoreContainer.classList.remove("hide");
-        userScore.innerHTML = `Your score is ${scoreCount} out of ${computerScienceQuizArray.length}`;
-    });
-
-    // Timer
-    const timerDisplay = () => {
-        countdown = setInterval(() => {
-            count--;
-            timeLeft.innerHTML = `${count}s`;
-            if (count == 0) {
-                clearInterval(countdown);
-                nextBtn.click();
-            }
-        }, 1000);
-    };
-
-    // Display quiz
-    const quizDisplay = (questionCount) => {
-        let quizCards = document.querySelectorAll(".container-mid");
-        quizCards.forEach((card) => card.classList.add("hide"));
-        quizCards[questionCount].classList.remove("hide");
-    };
-
-    // Create quiz
-    function quizCreator() {
-        computerScienceQuizArray.forEach((questionObj) => {
-            let div = document.createElement("div");
-            div.classList.add("container-mid", "hide");
-
-            let questionDiv = document.createElement("p");
-            questionDiv.classList.add("question");
-            questionDiv.innerHTML = questionObj.question;
-            div.appendChild(questionDiv);
-
-            questionObj.options.forEach(option => {
-                let optionButton = document.createElement("button");
-                optionButton.classList.add("option-div");
-                optionButton.innerHTML = option;
-                optionButton.onclick = () => checker(optionButton);
-                div.appendChild(optionButton);
+            restart.addEventListener("click", () => {
+                window.location.href = "select-quiz.html";
             });
 
-            quizContainer.appendChild(div);
-        });
 
-        // Show the first question
-        quizDisplay(0); // Ensure the first question is visible when the quiz starts
-    }
+            nextBtn.addEventListener("click", () => {
+                questionCount++;
+                if (questionCount === computerScienceQuizArray.length - 1) {
+                    nextBtn.classList.add("hide");
+                    submitBtn.classList.remove("hide");
+                }
 
-    // Answer Checker
-    function checker(userOption) {
-        let userSolution = userOption.innerText;
-        let question = document.getElementsByClassName("container-mid")[questionCount];
-        let options = question.querySelectorAll(".option-div");
-
-        let correctAnswer = computerScienceQuizArray[questionCount].correct;
-
-        // If the user's selected option is correct
-        if (userSolution === correctAnswer) {
-            userOption.classList.add("correct"); // Add 'correct' class to the selected option
-            scoreCount++;
-        } else {
-            userOption.classList.add("incorrect"); // Add 'incorrect' class to the selected option
-
-            // Highlight the correct answer as well
-            options.forEach(option => {
-                if (option.innerText === correctAnswer) {
-                    option.classList.add("correct"); // Highlight the correct option
+                if (questionCount === computerScienceQuizArray.length) {
+                    displayContainer.classList.add("hide");
+                    scoreContainer.classList.remove("hide");
+                    userScore.innerHTML = `Your score is ${scoreCount} out of ${computerScienceQuizArray.length}`;
+                } else {
+                    countOfQuestion.innerHTML = `${questionCount + 1} of ${computerScienceQuizArray.length} Questions`;
+                    quizDisplay(questionCount);
+                    count = 11;
+                    clearInterval(countdown);
+                    timerDisplay();
+                    previousBtn.classList.remove("hide");
                 }
             });
-        }
 
-        // Disable all options after an answer is selected
-        options.forEach(option => option.disabled = true);
-    }
 
-    // Start Quiz
-    startButton.addEventListener("click", () => {
-        startScreen.classList.add("hide");
-        displayContainer.classList.remove("hide");
-        quizCreator();
-        countOfQuestion.innerHTML = `1 of ${computerScienceQuizArray.length} questions`;
-        timerDisplay();
-    });
-});
+            function showReviewCard() {
+                let reviewCard = document.getElementById("review-card");
+                let answerList = document.getElementById("answer-list");
+                answerList.innerHTML = "";
+
+                computerScienceQuizArray.forEach((question, index) => {
+                    let answerDiv = document.createElement("div");
+                    answerDiv.classList.add("answer");
+
+                    let selectedAnswer = userAnswers[index] ? userAnswers[index].selected : "No answer selected";
+                    let correctAnswer = question.correct;
+
+                    answerDiv.innerHTML = `
+                <strong>Q${index + 1}: </strong>${question.question}<br>
+                <strong>Your Answer: </strong>${selectedAnswer}<br>
+                <strong>Correct Answer: </strong>${correctAnswer}
+            `;
+                    answerList.appendChild(answerDiv);
+                });
+
+                reviewCard.classList.remove("hide");
+            }
+
+
+            previousBtn.addEventListener("click", () => {
+                if (questionCount > 0) {
+                    questionCount--;
+                    nextBtn.classList.remove("hide");
+                    submitBtn.classList.add("hide");
+                    countOfQuestion.innerHTML = `${questionCount + 1} of ${computerScienceQuizArray.length} Questions`;
+                    quizDisplay(questionCount);
+                    count = 11;
+                    clearInterval(countdown);
+                    timerDisplay();
+
+                    if (questionCount === computerScienceQuizArray.length - 1) {
+                        nextBtn.classList.add("hide");
+                        submitBtn.classList.remove("hide");
+                    } else {
+                        nextBtn.classList.remove("hide");
+                        submitBtn.classList.add("hide");
+                    }
+
+                    if (questionCount === 0) {
+                        previousBtn.classList.add("hide");
+                    }
+                }
+            });
+
+
+
+            submitBtn.addEventListener("click", () => {
+                displayContainer.classList.add("hide");
+                scoreContainer.classList.remove("hide");
+                userScore.innerHTML = `Your score is ${scoreCount} out of ${computerScienceQuizArray.length}`;
+                showReviewCard();
+            });
+
+
+            const timerDisplay = () => {
+                countdown = setInterval(() => {
+                    count--;
+                    timeLeft.innerHTML = `${count}s`;
+                    if (count == 0) {
+                        clearInterval(countdown);
+                        nextBtn.click();
+                    }
+                }, 1000);
+            };
+
+
+            const quizDisplay = (questionCount) => {
+                let quizCards = document.querySelectorAll(".container-mid");
+                quizCards.forEach((card) => card.classList.add("hide"));
+                quizCards[questionCount].classList.remove("hide");
+            };
+
+
+            function quizCreator() {
+                computerScienceQuizArray.forEach((questionObj) => {
+                    let div = document.createElement("div");
+                    div.classList.add("container-mid", "hide");
+
+                    let questionDiv = document.createElement("p");
+                    questionDiv.classList.add("question");
+                    questionDiv.innerHTML = questionObj.question;
+                    div.appendChild(questionDiv);
+
+                    questionObj.options.forEach(option => {
+                        let optionButton = document.createElement("button");
+                        optionButton.classList.add("option-div");
+                        optionButton.innerHTML = option;
+                        optionButton.onclick = () => checker(optionButton);
+                        div.appendChild(optionButton);
+                    });
+
+                    quizContainer.appendChild(div);
+                });
+            }
+
+
+            function checker(userOption) {
+                let userSolution = userOption.innerText;
+                let question = document.getElementsByClassName("container-mid")[questionCount];
+                let options = question.querySelectorAll(".option-div");
+
+                let correctAnswer = computerScienceQuizArray[questionCount].correct;
+
+                if (userSolution === correctAnswer) {
+                    userOption.classList.add("correct");
+                    scoreCount++;
+                } else {
+                    userOption.classList.add("incorrect");
+
+                    options.forEach(option => {
+                        if (option.innerText === correctAnswer) {
+                            option.classList.add("correct");
+                        }
+                    });
+                }
+
+
+
+                userAnswers[questionCount] = { selected: userSolution, correct: correctAnswer };
+                options.forEach((element) => {
+                    element.disabled = true;
+                });
+            }
+
+
+            function initial() {
+                quizContainer.innerHTML = "";
+                questionCount = 0;
+                scoreCount = 0;
+                count = 11;
+                clearInterval(countdown);
+                timerDisplay();
+                quizCreator();
+                quizDisplay(questionCount);
+            }
+
+            startButton.addEventListener("click", () => {
+                startScreen.classList.add("hide");
+                displayContainer.classList.remove("hide");
+                initial();
+            });
+        });
     </script>
 </body>
 
