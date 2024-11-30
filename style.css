@@ -335,7 +335,7 @@ body.select-quiz {
     border: 2px solid #fff;
     position: absolute;
     bottom: -30px;
-    left: 165px;
+    left: 175px;
     color: #fff;
     outline: none;
     cursor: pointer;
@@ -382,7 +382,7 @@ body.select-quiz {
   .quiz-btn {
     margin-top: 8px !important;
     height: 40px;
-    width: 280px !important;
+    width: 300px !important;
     border-radius: 2px;
     border: none;
     background-color: #fff;
